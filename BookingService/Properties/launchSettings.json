@@ -1,0 +1,21 @@
+{
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:50106/",
+      "sslPort": 0
+    }
+  },
+  "profiles": {
+    "BookingService": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "launchUrl": "api/booking",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "http://localhost:6000/"
+    }
+  }
+}
