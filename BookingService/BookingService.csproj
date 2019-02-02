@@ -10,7 +10,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!--<PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.5" />-->
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.Azure.ServiceBus" Version="3.1.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.1.4" />
@@ -27,9 +26,6 @@
     </Reference>
     <Reference Include="EventDispatcher.Generic">
       <HintPath>..\..\EventDispatcher\EventDispatcher.Azure\bin\Debug\netcoreapp2.0\EventDispatcher.Generic.dll</HintPath>
-    </Reference>
-    <Reference Include="EventDispatcher.Generics">
-      <HintPath>..\..\EventDispatcher\EventDispatcher.Azure\bin\Debug\netcoreapp2.0\EventDispatcher.Generics.dll</HintPath>
     </Reference>
   </ItemGroup>
 
