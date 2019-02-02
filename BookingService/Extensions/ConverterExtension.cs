@@ -1,9 +1,7 @@
 ﻿using BookingService.DTOs;
 using BookingService.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using EventDispatcher.Generic;
+using Newtonsoft.Json;
 
 namespace BookingService.Extensions
 {
@@ -40,5 +38,13 @@ namespace BookingService.Extensions
 
             return existingBooking;
         }
+
+        public static EventMessage<T> ToEventMessage<T>(this Message message) =>
+            new EventMessage<T>
+            {
+                Id = message.Id.ToString(),
+                Header = message.Subject,
+                Content = JsonConvert.DeserializeObject<T>(message.Content)
+            };
     }
 }

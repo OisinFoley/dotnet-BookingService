@@ -1,9 +1,6 @@
 ﻿using BookingService.Data.Abstract;
 using BookingService.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace BookingService.Data
@@ -16,6 +13,8 @@ namespace BookingService.Data
         }
 
         public DbSet<Booking> Bookings { get; set; }
+
+        public DbSet<Message> Messages { get; set; }
 
         async Task<int> IUnitOfWork.SaveChangesAsync()
         {

@@ -10,11 +10,7 @@
   "profiles": {
     "BookingService": {
       "commandName": "Project",
-      "launchBrowser": false,
       "launchUrl": "api/booking",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      },
       "applicationUrl": "http://localhost:6000/"
     }
   }

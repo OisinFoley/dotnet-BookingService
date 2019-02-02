@@ -5,16 +5,25 @@ using BookingService.ApiResponses;
 using BookingService.ApiRequests;
 using BookingService.DTOs;
 using BookingService.Extensions;
+using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using System;
+using System.Linq;
+using Newtonsoft.Json;
+using System.Transactions;
 
 namespace BookingService.Controllers
 {
     public class BookingController : Controller
     {
         private readonly IBookingRepository m_BookingRepository;
+        private readonly IMessageRepository m_MessageRepository;
 
-        public BookingController(IBookingRepository bookingRepository)
+        public BookingController(IBookingRepository bookingRepository, IMessageRepository messageRepository)
         {
             m_BookingRepository = bookingRepository;
+            m_MessageRepository = messageRepository;
         }
 
         // GET api/v1/flights
@@ -38,7 +47,11 @@ namespace BookingService.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<BookingResponse> Post([FromBody] BookingRequest bookingRequest)
         {
-            Booking insertedBooking = await m_BookingRepository.InsertAsync(await GetHydratedBookingAsync(bookingRequest.Booking));
+            Booking booking = bookingRequest.Booking.ToBooking();
+
+            booking.Id = Guid.NewGuid();
+            var insertedBooking = (Booking)await MessageBusTransactionCall(nameof(Post).ToUpperInvariant(), booking,
+                async () => await m_BookingRepository.InsertAsync(booking));
 
             var response = new BookingResponse { Booking = insertedBooking.ToBookingDto() };
             return response;
@@ -48,6 +61,25 @@ namespace BookingService.Controllers
         {
             Booking booking = await m_BookingRepository.FindAsync(dto.Id);
             return dto.ToBooking(booking);
+        }
+
+        private async Task<object> MessageBusTransactionCall(string subject, object content, Func<Task<object>> databaseOperation)
+        {
+            var outboundMessage = new Message
+            {
+                Subject = subject,
+                Content = JsonConvert.SerializeObject(content)
+            };
+
+            using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                await m_MessageRepository.InsertAsync(outboundMessage);
+
+                object result = await databaseOperation();
+
+                transaction.Complete();
+                return result;
+            }
         }
     }
 }
