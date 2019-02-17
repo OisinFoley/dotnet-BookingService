@@ -1,11 +1,11 @@
 # Flight Booking Service
 
-## Dotnet Core Web API Application for adding flights to a SQL Azure database
+## Dotnet Core Web API Application for adding flight bookings to a SQL Azure database
 
 ## Features
 
-- POST requests to add new flights
-- Use of Azure Service Bus to communicate adding of new flights which subscribers can listen out for
+- POST requests to add new bookings for a flight
+- Use of Azure Service Bus to communicate adding of new bookings which subscribers can listen out for
 - Repository Pattern, Unit of Work Pattern
 - Singleton Pattern for OutboundMessage service which forms Service Bus to Azure
 - Use of DTOs to carry data between layers
