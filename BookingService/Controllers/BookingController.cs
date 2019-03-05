@@ -26,26 +26,46 @@ namespace BookingService.Controllers
             m_MessageRepository = messageRepository;
         }
 
-        // GET api/v1/flights
+        // GET: api/v1/bookings
         [HttpGet("api/v1/bookings")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<OkObjectResult> Get(Guid flightId)
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Get()
         {
             IEnumerable<Booking> bookings = await m_BookingRepository.GetBookings();
-
-            bookings = bookings.Where(b => b.FlightId == flightId);
-
-            return new OkObjectResult(bookings);
+            return Ok(bookings);
         }
 
-        // POST api/v1/flights
+        // GET: api/v1/bookings/{id}
+        [HttpGet("api/v1/bookings/{id}")]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Get(Guid id)
+        {
+            if (id == Guid.Empty)
+            {
+                return new BadRequestResult();
+            }
+
+            Booking booking = await m_BookingRepository.FindAsync(id);
+
+            if (booking == null)
+                return NotFound();
+
+            var response = new BookingResponse { Booking = booking.ToBookingDto() };
+            return Ok(response);
+        }
+
+        // POST api/v1/bookings
         [HttpPost("api/v1/bookings")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<BookingResponse> Post([FromBody] BookingRequest bookingRequest)
+        public async Task<IActionResult> Post([FromBody] BookingRequest bookingRequest)
         {
             Booking booking = bookingRequest.Booking.ToBooking();
 
@@ -54,7 +74,52 @@ namespace BookingService.Controllers
                 async () => await m_BookingRepository.InsertAsync(booking));
 
             var response = new BookingResponse { Booking = insertedBooking.ToBookingDto() };
-            return response;
+            return Ok(response);
+        }
+
+        // PUT: api/v1/bookings/{bookingId}
+        [HttpPut("api/v1/bookings/{id}")]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Put(Guid id, [FromBody] BookingRequest bookingRequest)
+        {
+            if (bookingRequest?.Booking == null)
+            {
+                return new BadRequestResult();
+            }
+
+            bookingRequest.Booking.Id = id;
+
+            if (!(m_BookingRepository.Bookings.Any(x => x.Id == bookingRequest.Booking.Id)))
+            {
+                return NotFound();
+            }
+
+            Booking flight = await GetHydratedBookingAsync(bookingRequest.Booking);
+            await m_BookingRepository.UpdateAsync(flight);
+
+            return Ok(flight);
+        }
+
+        // DELETE: api/v1/bookings/{bookingId}
+        [HttpDelete("api/v1/bookings/{id}")]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            Booking booking = m_BookingRepository.Bookings.FirstOrDefault(b => b.Id == id);
+            if (booking == null)
+            {
+                return new NotFoundResult();
+            }
+
+            await m_BookingRepository.DeleteAsync(booking);
+
+            return Ok();
         }
 
         private async Task<Booking> GetHydratedBookingAsync(BookingDto dto)
