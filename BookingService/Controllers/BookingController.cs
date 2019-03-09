@@ -65,7 +65,7 @@ namespace BookingService.Controllers
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Post([FromBody] BookingRequest bookingRequest)
+        public async Task<ObjectResult> Post([FromBody] BookingRequest bookingRequest)
         {
             Booking booking = bookingRequest.Booking.ToBooking();
 

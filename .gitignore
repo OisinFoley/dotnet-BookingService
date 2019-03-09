@@ -2,4 +2,6 @@ BookingService/bin
 BookingService/obj
 BookingService/appsettings.json
 BookingService/appsettings.Development.json
+BookingService.Tests/bin
+BookingService.Tests/obj
 .vs/
