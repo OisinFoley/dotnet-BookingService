@@ -1,10 +1,10 @@
+using BookingService.ApiRequests;
 using BookingService.ApiResponses;
 using BookingService.Controllers;
 using BookingService.Data.Abstract;
 using BookingService.DTOs;
 using BookingService.Models;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json.Linq;
 using NSubstitute;
 using System;
 using System.Collections.Generic;
@@ -74,7 +74,7 @@ namespace BookingService.Tests
         #region GetBooking(s)
 
         [Fact]
-        public async Task GetAllBookingsReturnsOkObjectResponseWhenRecordsFound()
+        public async Task GetAllBookingsReturnsOkObjectResponse()
         {
             // Arrange
             var bookingController = new BookingController(m_BookingRepository, m_MessageRepository);
@@ -85,7 +85,6 @@ namespace BookingService.Tests
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
-            Assert.NotEmpty((IEnumerable<Booking>)parsedResult.Value);
             Assert.True(parsedResult.StatusCode == 200);
         }
 
@@ -121,7 +120,7 @@ namespace BookingService.Tests
 
         
         [Fact]
-        public async Task GetBookingByIdReturnsTheCorrectObjectWhenFound()
+        public async Task GetBookingByIdReturnsOkObjectResultAndCorrectObjectWhenRecordFound()
         {
             // Arrange
             m_Bookings.Add(new Booking { Id = new Guid(Guid3), CustomerId = CustomerId3, FlightId = FlightId3, PriceWhenBooked = PriceWhenBooked3, SeatNumber = SeatNumber3 });
@@ -143,7 +142,170 @@ namespace BookingService.Tests
             Assert.Equal(PriceWhenBooked2, booking2.PriceWhenBooked);
             Assert.Equal(SeatNumber2, booking2.SeatNumber);
         }
-        
+
+        #endregion
+
+        #region PostBooking
+
+        [Fact]
+        public async Task PostReturnsOkObjectResultWhenBookingIsAdded()
+        {
+            // Arrange
+            var bookingController = new BookingController(m_BookingRepository, m_MessageRepository);
+            var bookingDto = new BookingDto { Id = new Guid(Guid3), CustomerId = CustomerId3, FlightId = FlightId3, PriceWhenBooked = PriceWhenBooked3, SeatNumber = SeatNumber3 };
+            var bookingRequest = new BookingRequest { Booking = bookingDto };
+
+            // Act
+            IActionResult result = await bookingController.Post(bookingRequest).ConfigureAwait(false);
+            var parsedResult = result as OkObjectResult;
+            
+            // Assert
+            Assert.IsType<OkObjectResult>(result);
+            Assert.True(parsedResult.StatusCode == 200);
+
+            var response = Assert.IsType<BookingResponse>((parsedResult.Value));
+            var bookingResponse = Assert.IsType<BookingDto>(response.Booking);
+            Assert.NotEqual(Guid.Empty, bookingResponse.Id);
+            Assert.Equal(CustomerId3, bookingResponse.CustomerId);
+            Assert.Equal(FlightId3, bookingResponse.FlightId);
+            Assert.Equal(PriceWhenBooked3, bookingResponse.PriceWhenBooked);
+            Assert.Equal(SeatNumber3, bookingResponse.SeatNumber);
+        }
+
+        [Fact]
+        public async Task PostReturnsBadRequestResultWhenBookingIsNull()
+        {
+            // Arrange
+            var bookingController = new BookingController(m_BookingRepository, m_MessageRepository);
+            var bookingRequest = new BookingRequest { Booking = null };
+
+            // Act
+            IActionResult result = await bookingController.Post(bookingRequest).ConfigureAwait(false);
+
+            // Assert
+            Assert.IsType<BadRequestResult>(result);
+        }
+
+        #endregion
+
+        #region PutBooking
+
+        [Fact]
+        public async Task PutReturnsNotFoundResponseWhenIdDoesNotExist()
+        {
+            // Arrange
+            var bookingController = new BookingController(m_BookingRepository, m_MessageRepository);
+            var bookingDto = new BookingDto { CustomerId = CustomerId3, FlightId = FlightId3, PriceWhenBooked = PriceWhenBooked3, SeatNumber = SeatNumber3 };
+            var bookingRequest = new BookingRequest { Booking = bookingDto };
+
+            // Act
+            IActionResult result = await bookingController.Put(new Guid(Guid3), bookingRequest).ConfigureAwait(false);
+            var parsedResult = result as NotFoundResult;
+
+            // Assert
+            Assert.IsType<NotFoundResult>(result);
+            Assert.True(parsedResult.StatusCode == 404);
+        }
+
+        [Fact]
+        public async Task PutReturnsOkResponseWhenExistingBookingIsUpdated()
+        {
+
+            // Arrange
+            var bookingController = new BookingController(m_BookingRepository, m_MessageRepository);
+            var bookingDto = new BookingDto { CustomerId = CustomerId3, FlightId = FlightId3, PriceWhenBooked = PriceWhenBooked3, SeatNumber = SeatNumber3 };
+            var bookingRequest = new BookingRequest { Booking = bookingDto };
+            var guid = new Guid(Guid2);
+
+            // Act
+            IActionResult result = await bookingController.Put(guid, bookingRequest).ConfigureAwait(false);
+            var parsedResult = result as OkObjectResult;
+
+            // Assert
+            Assert.IsType<OkObjectResult>(result);
+            Assert.True(parsedResult.StatusCode == 200);
+
+            var response = Assert.IsType<BookingResponse>(parsedResult.Value);
+            Assert.IsType<BookingDto>(response.Booking);
+
+            Booking bookingResponse = m_Bookings.Single(x => x.Id == guid);
+            Assert.Equal(guid, bookingResponse.Id);
+            Assert.Equal(CustomerId3, bookingResponse.CustomerId);
+            Assert.Equal(FlightId3, bookingResponse.FlightId);
+            Assert.Equal(SeatNumber3, bookingResponse.SeatNumber);
+            Assert.Equal(PriceWhenBooked3, bookingResponse.PriceWhenBooked);
+        }
+
+        [Fact]
+        public async Task PutReturnsBadRequestWhenBookingIsNull()
+        {
+            // Arrange
+            var bookingController = new BookingController(m_BookingRepository, m_MessageRepository);
+            var bookingRequest = new BookingRequest { Booking = null };
+
+            // Act
+            IActionResult result = await bookingController.Put(new Guid(Guid3), bookingRequest).ConfigureAwait(false);
+            var parsedResult = result as BadRequestResult;
+
+            // Assert
+            Assert.IsType<BadRequestResult>(result);
+            Assert.True(parsedResult.StatusCode == 400);
+        }
+
+        [Fact]
+        public async Task PutReturnsNotFoundWhenIdIsNull()
+        {
+            // Arrange
+            var bookingController = new BookingController(m_BookingRepository, m_MessageRepository);
+            var bookingDto = new BookingDto { CustomerId = CustomerId3, FlightId = FlightId3, PriceWhenBooked = PriceWhenBooked3, SeatNumber = SeatNumber3 };
+            var bookingRequest = new BookingRequest { Booking = bookingDto };
+
+            // Act
+            IActionResult result = await bookingController.Put(Guid.Empty, bookingRequest).ConfigureAwait(false);
+            var parsedResult = result as NotFoundResult;
+
+            // Assert
+            Assert.IsType<NotFoundResult>(result);
+            Assert.True(parsedResult.StatusCode == 404);
+        }
+
+        #endregion
+
+        #region DeleteBooking
+
+        [Fact]
+        public async Task DeleteReturnsNotFoundResponseWhenIdDoesNotExist()
+        {
+            // Arrange
+            var bookingController = new BookingController(m_BookingRepository, m_MessageRepository);
+
+            // Act
+            IActionResult result = await bookingController.Delete(new Guid(Guid3)).ConfigureAwait(false);
+            var parsedResult = result as NotFoundResult;
+
+            // Assert
+            Assert.IsType<NotFoundResult>(result);
+            Assert.True(parsedResult.StatusCode == 404);
+        }
+
+        [Fact]
+        public async Task DeleteReturnsOkResponseWhenExistingBindingDeleted()
+        {
+            // Arrange
+            var bookingController = new BookingController(m_BookingRepository, m_MessageRepository);
+            var bookingGuid = new Guid(Guid2);
+            Booking booking = m_Bookings.Single(x => x.Id == bookingGuid);
+
+            // Act
+            IActionResult result = await bookingController.Delete(bookingGuid).ConfigureAwait(false);
+            var parsedResult = result as OkResult;
+
+            // Assert
+            Assert.IsType<OkResult>(result);
+            Assert.DoesNotContain(booking, m_Bookings);
+            Assert.Single(m_Bookings);
+        }
+
         #endregion
     }
 }

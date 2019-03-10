@@ -65,8 +65,13 @@ namespace BookingService.Controllers
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ObjectResult> Post([FromBody] BookingRequest bookingRequest)
+        public async Task<IActionResult> Post([FromBody] BookingRequest bookingRequest)
         {
+            if (bookingRequest?.Booking == null)
+            {
+                return new BadRequestResult();
+            }
+
             Booking booking = bookingRequest.Booking.ToBooking();
 
             booking.Id = Guid.NewGuid();
@@ -97,10 +102,12 @@ namespace BookingService.Controllers
                 return NotFound();
             }
 
-            Booking flight = await GetHydratedBookingAsync(bookingRequest.Booking);
-            await m_BookingRepository.UpdateAsync(flight);
+            Booking booking = await GetHydratedBookingAsync(bookingRequest.Booking);
+            await m_BookingRepository.UpdateAsync(booking);
 
-            return Ok(flight);
+            var response = new BookingResponse { Booking = booking.ToBookingDto() };
+
+            return Ok(response);
         }
 
         // DELETE: api/v1/bookings/{bookingId}
