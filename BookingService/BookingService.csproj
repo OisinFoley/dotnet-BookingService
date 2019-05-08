@@ -9,24 +9,20 @@
     <Folder Include="wwwroot\" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.App" />
+  <ItemGroup><!--<DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.2" />-->
+  
+    <PackageReference Include="EventDispatcher.Azure" Version="1.0.0" />
+  
+    <PackageReference Include="EventDispatcher.Generic" Version="1.0.0" />
+  
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.1.6" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.1.3" />
     <PackageReference Include="Microsoft.Azure.ServiceBus" Version="3.1.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.1.4" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="2.2.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="EventDispatcher.Azure">
-      <HintPath>..\..\EventDispatcher\EventDispatcher.Azure\bin\Debug\netcoreapp2.0\EventDispatcher.Azure.dll</HintPath>
-    </Reference>
-    <Reference Include="EventDispatcher.Generic">
-      <HintPath>..\..\EventDispatcher\EventDispatcher.Azure\bin\Debug\netcoreapp2.0\EventDispatcher.Generic.dll</HintPath>
-    </Reference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.1.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="2.1.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.1.4" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="2.1.1" />
   </ItemGroup>
 
 </Project>
