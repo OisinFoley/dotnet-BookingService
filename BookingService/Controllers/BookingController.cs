@@ -26,7 +26,9 @@ namespace BookingService.Controllers
             m_MessageRepository = messageRepository;
         }
 
-        // GET: api/v1/bookings
+        /// <summary>
+        /// Retrieves all known Bookings.
+        /// </summary>
         [HttpGet("api/v1/bookings")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -38,7 +40,9 @@ namespace BookingService.Controllers
             return Ok(bookings);
         }
 
-        // GET: api/v1/bookings/{id}
+        /// <summary>
+        /// Retrieves a specific Booking.
+        /// </summary>
         [HttpGet("api/v1/bookings/{id}")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -60,6 +64,9 @@ namespace BookingService.Controllers
             return Ok(response);
         }
 
+        /// <summary>
+        /// Adds a new Booking.
+        /// </summary>
         // POST api/v1/bookings
         [HttpPost("api/v1/bookings")]
         [Produces("application/json")]
@@ -82,6 +89,9 @@ namespace BookingService.Controllers
             return Ok(response);
         }
 
+        /// <summary>
+        /// Updates a specific existing Booking.
+        /// </summary>
         // PUT: api/v1/bookings/{bookingId}
         [HttpPut("api/v1/bookings/{id}")]
         [Produces("application/json")]
@@ -110,6 +120,9 @@ namespace BookingService.Controllers
             return Ok(response);
         }
 
+        /// <summary>
+        /// Deletes a specific Booking.
+        /// </summary>
         // DELETE: api/v1/bookings/{bookingId}
         [HttpDelete("api/v1/bookings/{id}")]
         [Produces("application/json")]

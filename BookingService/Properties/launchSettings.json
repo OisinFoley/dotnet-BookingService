@@ -10,8 +10,7 @@
   "profiles": {
     "BookingService": {
       "commandName": "Project",
-      "launchUrl": "api/booking",
-      "applicationUrl": "http://localhost:6000/"
+      "applicationUrl": "http://localhost:6010/"
     }
   }
 }
