@@ -12,6 +12,9 @@ using BookingService.Models;
 using EventDispatcher.Azure;
 using System.Globalization;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
+using Swashbuckle.AspNetCore.Swagger;
+using System.Reflection;
+using System.IO;
 
 namespace BookingService
 {
@@ -40,7 +43,7 @@ namespace BookingService
                 {
                     string topicName = Configuration["OutboundMessageService:TopicName"];
                     string messageBusConnectionString = Configuration["OutboundMessageService:ConnectionString"];
-                    
+
                     var simpleEventSender = new EventSender<Booking>(messageBusConnectionString, topicName);
                     var messageRepository = serviceProvider.GetService<IMessageRepository>();
                     var logger = serviceProvider.GetService<ILogger<OutboundMessageService<Booking>>>();
@@ -48,11 +51,34 @@ namespace BookingService
 
                     return new OutboundMessageService<Booking>(simpleEventSender, messageRepository, logger, pollingIntervalInMilliseconds);
                 });
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Info
+                {
+                    Version = "v1",
+                    Title = "Booking Service API",
+                    Description = "Simple API to perform CRUDs on Flight Bookings",
+                });
+
+                // Set the comments path for the Swagger JSON and UI.
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
+
+                c.DescribeAllParametersInCamelCase();
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Booking Service API V1");
+            });
+
             app.UseMvc();
         }
     }
