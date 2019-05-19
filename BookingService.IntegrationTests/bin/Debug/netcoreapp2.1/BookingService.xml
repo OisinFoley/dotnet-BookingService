@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>BookingService</name>
+    </assembly>
+    <members>
+        <member name="M:BookingService.Controllers.BookingController.Get">
+            <summary>
+            Retrieves all known Bookings.
+            </summary>
+        </member>
+        <member name="M:BookingService.Controllers.BookingController.Get(System.Guid)">
+            <summary>
+            Retrieves a specific Booking.
+            </summary>
+        </member>
+        <member name="M:BookingService.Controllers.BookingController.Post(BookingService.ApiRequests.BookingRequest)">
+            <summary>
+            Adds a new Booking.
+            </summary>
+        </member>
+        <member name="M:BookingService.Controllers.BookingController.Put(System.Guid,BookingService.ApiRequests.BookingRequest)">
+            <summary>
+            Updates a specific existing Booking.
+            </summary>
+        </member>
+        <member name="M:BookingService.Controllers.BookingController.Delete(System.Guid)">
+            <summary>
+            Deletes a specific Booking.
+            </summary>
+        </member>
+    </members>
+</doc>

@@ -1,8 +1,9 @@
-﻿using BookingService.ApiResponses;
+﻿using BookingService.DTOs;
 
 namespace BookingService.ApiRequests
 {
-    public class BookingRequest : BookingResponse
+    public class BookingRequest
     {
+        public BookingRequestDto Booking { get; set; }
     }
 }

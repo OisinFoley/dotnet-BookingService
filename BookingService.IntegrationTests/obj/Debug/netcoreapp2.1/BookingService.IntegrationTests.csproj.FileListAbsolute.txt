@@ -1,0 +1,17 @@
+C:\Users\oisin_000\Documents\Visual Studio 2017\Projects\BookingService\BookingService.IntegrationTests\obj\Debug\netcoreapp2.1\BookingService.IntegrationTests.csprojResolveAssemblyReference.cache
+C:\Users\oisin_000\Documents\Visual Studio 2017\Projects\BookingService\BookingService.IntegrationTests\obj\Debug\netcoreapp2.1\BookingService.IntegrationTests.csproj.CoreCompileInputs.cache
+C:\Users\oisin_000\Documents\Visual Studio 2017\Projects\BookingService\BookingService.IntegrationTests\obj\Debug\netcoreapp2.1\BookingService.IntegrationTests.AssemblyInfoInputs.cache
+C:\Users\oisin_000\Documents\Visual Studio 2017\Projects\BookingService\BookingService.IntegrationTests\obj\Debug\netcoreapp2.1\BookingService.IntegrationTests.AssemblyInfo.cs
+C:\Users\oisin_000\Documents\Visual Studio 2017\Projects\BookingService\BookingService.IntegrationTests\bin\Debug\netcoreapp2.1\xunit.runner.visualstudio.dotnetcore.testadapter.dll
+C:\Users\oisin_000\Documents\Visual Studio 2017\Projects\BookingService\BookingService.IntegrationTests\bin\Debug\netcoreapp2.1\xunit.runner.reporters.netcoreapp10.dll
+C:\Users\oisin_000\Documents\Visual Studio 2017\Projects\BookingService\BookingService.IntegrationTests\bin\Debug\netcoreapp2.1\xunit.runner.utility.netcoreapp10.dll
+C:\Users\oisin_000\Documents\Visual Studio 2017\Projects\BookingService\BookingService.IntegrationTests\bin\Debug\netcoreapp2.1\BookingService.IntegrationTests.deps.json
+C:\Users\oisin_000\Documents\Visual Studio 2017\Projects\BookingService\BookingService.IntegrationTests\bin\Debug\netcoreapp2.1\BookingService.IntegrationTests.runtimeconfig.json
+C:\Users\oisin_000\Documents\Visual Studio 2017\Projects\BookingService\BookingService.IntegrationTests\bin\Debug\netcoreapp2.1\BookingService.IntegrationTests.runtimeconfig.dev.json
+C:\Users\oisin_000\Documents\Visual Studio 2017\Projects\BookingService\BookingService.IntegrationTests\bin\Debug\netcoreapp2.1\BookingService.IntegrationTests.dll
+C:\Users\oisin_000\Documents\Visual Studio 2017\Projects\BookingService\BookingService.IntegrationTests\bin\Debug\netcoreapp2.1\BookingService.IntegrationTests.pdb
+C:\Users\oisin_000\Documents\Visual Studio 2017\Projects\BookingService\BookingService.IntegrationTests\bin\Debug\netcoreapp2.1\BookingService.dll
+C:\Users\oisin_000\Documents\Visual Studio 2017\Projects\BookingService\BookingService.IntegrationTests\bin\Debug\netcoreapp2.1\BookingService.pdb
+C:\Users\oisin_000\Documents\Visual Studio 2017\Projects\BookingService\BookingService.IntegrationTests\bin\Debug\netcoreapp2.1\BookingService.xml
+C:\Users\oisin_000\Documents\Visual Studio 2017\Projects\BookingService\BookingService.IntegrationTests\obj\Debug\netcoreapp2.1\BookingService.IntegrationTests.dll
+C:\Users\oisin_000\Documents\Visual Studio 2017\Projects\BookingService\BookingService.IntegrationTests\obj\Debug\netcoreapp2.1\BookingService.IntegrationTests.pdb
