@@ -4,4 +4,5 @@ BookingService/appsettings.json
 BookingService/appsettings.Development.json
 BookingService.Tests/bin
 BookingService.Tests/obj
+BookingService.IntegrationTests
 .vs/
