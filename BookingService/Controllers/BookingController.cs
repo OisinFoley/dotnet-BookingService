@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Http;
 using BookingService.Models;
 using BookingService.ApiResponses;
 using BookingService.ApiRequests;
-using BookingService.DTOs;
 using BookingService.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -15,6 +14,7 @@ using System.Transactions;
 
 namespace BookingService.Controllers
 {
+    [ApiController]
     public class BookingController : Controller
     {
         private readonly IBookingRepository m_BookingRepository;
@@ -31,13 +31,18 @@ namespace BookingService.Controllers
         /// </summary>
         [HttpGet("api/v1/bookings")]
         [Produces("application/json")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BookingsResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Get()
         {
             IEnumerable<Booking> bookings = await m_BookingRepository.GetBookings();
-            return Ok(bookings);
+
+            var response = new BookingsResponse
+            {
+                Bookings = bookings.Select(booking => booking.ToBookingResponseDto())
+            };
+            return Ok(response);
         }
 
         /// <summary>
@@ -45,7 +50,7 @@ namespace BookingService.Controllers
         /// </summary>
         [HttpGet("api/v1/bookings/{id}")]
         [Produces("application/json")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BookingResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Get(Guid id)
@@ -60,17 +65,16 @@ namespace BookingService.Controllers
             if (booking == null)
                 return NotFound();
 
-            var response = new BookingResponse { Booking = booking.ToBookingDto() };
+            var response = new BookingResponse { Booking = booking.ToBookingResponseDto() };
             return Ok(response);
         }
 
         /// <summary>
         /// Adds a new Booking.
         /// </summary>
-        // POST api/v1/bookings
         [HttpPost("api/v1/bookings")]
         [Produces("application/json")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BookingResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Post([FromBody] BookingRequest bookingRequest)
         {
@@ -85,17 +89,16 @@ namespace BookingService.Controllers
             var insertedBooking = (Booking)await MessageBusTransactionCall(nameof(Post).ToUpperInvariant(), booking,
                 async () => await m_BookingRepository.InsertAsync(booking));
 
-            var response = new BookingResponse { Booking = insertedBooking.ToBookingDto() };
+            var response = new BookingResponse { Booking = insertedBooking.ToBookingResponseDto() };
             return Ok(response);
         }
 
         /// <summary>
         /// Updates a specific existing Booking.
         /// </summary>
-        // PUT: api/v1/bookings/{bookingId}
         [HttpPut("api/v1/bookings/{id}")]
         [Produces("application/json")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BookingResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Put(Guid id, [FromBody] BookingRequest bookingRequest)
@@ -105,17 +108,19 @@ namespace BookingService.Controllers
                 return new BadRequestResult();
             }
 
-            bookingRequest.Booking.Id = id;
-
-            if (!(m_BookingRepository.Bookings.Any(x => x.Id == bookingRequest.Booking.Id)))
+            Booking booking = m_BookingRepository.Bookings.SingleOrDefault(x => x.Id == id);
+            if (booking == null)
             {
                 return NotFound();
             }
 
-            Booking booking = await GetHydratedBookingAsync(bookingRequest.Booking);
-            await m_BookingRepository.UpdateAsync(booking);
+            booking.CustomerId = bookingRequest.Booking.CustomerId;
+            booking.FlightId = bookingRequest.Booking.FlightId;
+            booking.PriceWhenBooked = bookingRequest.Booking.PriceWhenBooked;
+            booking.SeatNumber = bookingRequest.Booking.SeatNumber;
 
-            var response = new BookingResponse { Booking = booking.ToBookingDto() };
+            var bookingResponse = await m_BookingRepository.UpdateAsync(booking);
+            var response = new BookingResponse { Booking = booking.ToBookingResponseDto() };
 
             return Ok(response);
         }
@@ -123,7 +128,6 @@ namespace BookingService.Controllers
         /// <summary>
         /// Deletes a specific Booking.
         /// </summary>
-        // DELETE: api/v1/bookings/{bookingId}
         [HttpDelete("api/v1/bookings/{id}")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -140,12 +144,6 @@ namespace BookingService.Controllers
             await m_BookingRepository.DeleteAsync(booking);
 
             return Ok();
-        }
-
-        private async Task<Booking> GetHydratedBookingAsync(BookingDto dto)
-        {
-            Booking booking = await m_BookingRepository.FindAsync(dto.Id);
-            return dto.ToBooking(booking);
         }
 
         private async Task<object> MessageBusTransactionCall(string subject, object content, Func<Task<object>> databaseOperation)

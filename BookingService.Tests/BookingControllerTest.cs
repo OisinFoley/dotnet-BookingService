@@ -136,7 +136,7 @@ namespace BookingService.Tests
 
             var response = Assert.IsType<BookingResponse>((parsedResult.Value));
 
-            BookingDto booking2 = response.Booking;
+            BookingResponseDto booking2 = response.Booking;
             Assert.Equal(CustomerId2, booking2.CustomerId.ToString());
             Assert.Equal(FlightId2, booking2.FlightId.ToString());
             Assert.Equal(PriceWhenBooked2, booking2.PriceWhenBooked);
@@ -152,8 +152,8 @@ namespace BookingService.Tests
         {
             // Arrange
             var bookingController = new BookingController(m_BookingRepository, m_MessageRepository);
-            var bookingDto = new BookingDto { Id = new Guid(Guid3), CustomerId = CustomerId3, FlightId = FlightId3, PriceWhenBooked = PriceWhenBooked3, SeatNumber = SeatNumber3 };
-            var bookingRequest = new BookingRequest { Booking = bookingDto };
+            var bookingRequestDto = new BookingRequestDto { CustomerId = CustomerId3, FlightId = FlightId3, PriceWhenBooked = PriceWhenBooked3, SeatNumber = SeatNumber3 };
+            var bookingRequest = new BookingRequest { Booking = bookingRequestDto };
 
             // Act
             IActionResult result = await bookingController.Post(bookingRequest).ConfigureAwait(false);
@@ -164,7 +164,7 @@ namespace BookingService.Tests
             Assert.True(parsedResult.StatusCode == 200);
 
             var response = Assert.IsType<BookingResponse>((parsedResult.Value));
-            var bookingResponse = Assert.IsType<BookingDto>(response.Booking);
+            var bookingResponse = Assert.IsType<BookingResponseDto>(response.Booking);
             Assert.NotEqual(Guid.Empty, bookingResponse.Id);
             Assert.Equal(CustomerId3, bookingResponse.CustomerId);
             Assert.Equal(FlightId3, bookingResponse.FlightId);
@@ -195,9 +195,9 @@ namespace BookingService.Tests
         {
             // Arrange
             var bookingController = new BookingController(m_BookingRepository, m_MessageRepository);
-            var bookingDto = new BookingDto { CustomerId = CustomerId3, FlightId = FlightId3, PriceWhenBooked = PriceWhenBooked3, SeatNumber = SeatNumber3 };
-            var bookingRequest = new BookingRequest { Booking = bookingDto };
-
+            var bookingRequestDto = new BookingRequestDto { CustomerId = CustomerId3, FlightId = FlightId3, PriceWhenBooked = PriceWhenBooked3, SeatNumber = SeatNumber3 };
+            var bookingRequest = new BookingRequest { Booking = bookingRequestDto };
+            
             // Act
             IActionResult result = await bookingController.Put(new Guid(Guid3), bookingRequest).ConfigureAwait(false);
             var parsedResult = result as NotFoundResult;
@@ -213,8 +213,9 @@ namespace BookingService.Tests
 
             // Arrange
             var bookingController = new BookingController(m_BookingRepository, m_MessageRepository);
-            var bookingDto = new BookingDto { CustomerId = CustomerId3, FlightId = FlightId3, PriceWhenBooked = PriceWhenBooked3, SeatNumber = SeatNumber3 };
-            var bookingRequest = new BookingRequest { Booking = bookingDto };
+            var bookingRequestDto = new BookingRequestDto { CustomerId = CustomerId3, FlightId = FlightId3, PriceWhenBooked = PriceWhenBooked3, SeatNumber = SeatNumber3 };
+            var bookingRequest = new BookingRequest { Booking = bookingRequestDto };
+            
             var guid = new Guid(Guid2);
 
             // Act
@@ -226,9 +227,10 @@ namespace BookingService.Tests
             Assert.True(parsedResult.StatusCode == 200);
 
             var response = Assert.IsType<BookingResponse>(parsedResult.Value);
-            Assert.IsType<BookingDto>(response.Booking);
+            Assert.IsType<BookingResponseDto>(response.Booking);
 
-            Booking bookingResponse = m_Bookings.Single(x => x.Id == guid);
+            BookingResponseDto bookingResponse = response.Booking;
+
             Assert.Equal(guid, bookingResponse.Id);
             Assert.Equal(CustomerId3, bookingResponse.CustomerId);
             Assert.Equal(FlightId3, bookingResponse.FlightId);
@@ -257,8 +259,8 @@ namespace BookingService.Tests
         {
             // Arrange
             var bookingController = new BookingController(m_BookingRepository, m_MessageRepository);
-            var bookingDto = new BookingDto { CustomerId = CustomerId3, FlightId = FlightId3, PriceWhenBooked = PriceWhenBooked3, SeatNumber = SeatNumber3 };
-            var bookingRequest = new BookingRequest { Booking = bookingDto };
+            var bookingRequestDto = new BookingRequestDto { CustomerId = CustomerId3, FlightId = FlightId3, PriceWhenBooked = PriceWhenBooked3, SeatNumber = SeatNumber3 };
+            var bookingRequest = new BookingRequest { Booking = bookingRequestDto };
 
             // Act
             IActionResult result = await bookingController.Put(Guid.Empty, bookingRequest).ConfigureAwait(false);

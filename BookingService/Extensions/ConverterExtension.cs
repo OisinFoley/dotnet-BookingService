@@ -7,7 +7,8 @@ namespace BookingService.Extensions
 {
     public static class ConverterExtension
     {
-        public static BookingDto ToBookingDto(this Booking booking) => new BookingDto
+        public static BookingResponseDto ToBookingResponseDto(this Booking booking) => 
+        new BookingResponseDto
         {
             Id = booking.Id,
             CustomerId = booking.CustomerId,
@@ -17,14 +18,13 @@ namespace BookingService.Extensions
         };
 
         public static Booking ToBooking(
-            this BookingDto dto,
+            this BookingRequestDto dto,
             Booking existingBooking = null)
         {
 
             if (existingBooking == null)
                 return new Booking
                 {
-                    Id = dto.Id,
                     CustomerId = dto.CustomerId,
                     FlightId = dto.FlightId,
                     PriceWhenBooked = dto.PriceWhenBooked,
