@@ -1,9 +1,0 @@
-C:\Users\oisin_000\Documents\Visual Studio 2017\Projects\BookingService\client\BookingService.Client\BookingService.Client\bin\Debug\netcoreapp2.1\BookingService.Client.deps.json
-C:\Users\oisin_000\Documents\Visual Studio 2017\Projects\BookingService\client\BookingService.Client\BookingService.Client\bin\Debug\netcoreapp2.1\BookingService.Client.dll
-C:\Users\oisin_000\Documents\Visual Studio 2017\Projects\BookingService\client\BookingService.Client\BookingService.Client\obj\Debug\netcoreapp2.1\BookingService.Client.csproj.CoreCompileInputs.cache
-C:\Users\oisin_000\Documents\Visual Studio 2017\Projects\BookingService\client\BookingService.Client\BookingService.Client\obj\Debug\netcoreapp2.1\BookingService.Client.AssemblyInfoInputs.cache
-C:\Users\oisin_000\Documents\Visual Studio 2017\Projects\BookingService\client\BookingService.Client\BookingService.Client\obj\Debug\netcoreapp2.1\BookingService.Client.AssemblyInfo.cs
-C:\Users\oisin_000\Documents\Visual Studio 2017\Projects\BookingService\client\BookingService.Client\BookingService.Client\bin\Debug\netcoreapp2.1\BookingService.Client.pdb
-C:\Users\oisin_000\Documents\Visual Studio 2017\Projects\BookingService\client\BookingService.Client\BookingService.Client\obj\Debug\netcoreapp2.1\BookingService.Client.dll
-C:\Users\oisin_000\Documents\Visual Studio 2017\Projects\BookingService\client\BookingService.Client\BookingService.Client\obj\Debug\netcoreapp2.1\BookingService.Client.pdb
-C:\Users\oisin_000\Documents\Visual Studio 2017\Projects\BookingService\client\BookingService.Client\BookingService.Client\obj\Debug\netcoreapp2.1\BookingService.Client.csprojAssemblyReference.cache

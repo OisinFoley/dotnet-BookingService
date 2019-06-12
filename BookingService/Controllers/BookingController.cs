@@ -73,7 +73,7 @@ namespace BookingService.Controllers
         /// Adds a new Booking.
         /// </summary>
         [HttpPost("api/v1/bookings")]
-        [Produces("application/json", Type = typeof(BookingResponse))]
+        [Produces("application/json")]
         [ProducesResponseType(typeof(BookingResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Post([FromBody] BookingRequest bookingRequest)
