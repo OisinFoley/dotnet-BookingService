@@ -3,6 +3,7 @@ using BookingService.ApiResponses;
 using BookingService.Controllers;
 using BookingService.Data.Abstract;
 using BookingService.DTOs;
+using BookingService.FlightValidation;
 using BookingService.Models;
 using Microsoft.AspNetCore.Mvc;
 using NSubstitute;
@@ -18,21 +19,23 @@ namespace BookingService.Tests
     {
         private readonly IBookingRepository m_BookingRepository;
         private readonly IMessageRepository m_MessageRepository;
+        private readonly IFlightValidator m_FlightValidator;
+        
         private readonly List<Booking> m_Bookings;
 
-        private const string Guid1 = "eb1e1206-d482-4b83-a613-a6db91ce732a";
-        private const string CustomerId1 = "448bd1df-6376-4c8a-a9aa-b0d673bea3b6";
-        private const string FlightId1 = "05651d29-6354-468d-82ac-2b6bf613a753";
+        private Guid Guid1 = new Guid("eb1e1206-d482-4b83-a613-a6db91ce732a");
+        private Guid CustomerId1 = new Guid("448bd1df-6376-4c8a-a9aa-b0d673bea3b6");
+        private Guid FlightId1 = new Guid("05651d29-6354-468d-82ac-2b6bf613a753");
         private const int PriceWhenBooked1 = 100;
         private const string SeatNumber1 = "15B";
 
-        private const string Guid2 = "ab3147bb-25d3-4c6b-bbdd-42d658b205c3";
-        private const string CustomerId2 = "ad80c8e8-f708-4b7f-a29a-1f4eef4aad30";
-        private const string FlightId2 = "3d1275cb-b540-4799-aa3d-2458b61d152d";
+        private Guid Guid2 = new Guid("ab3147bb-25d3-4c6b-bbdd-42d658b205c3");
+        private Guid CustomerId2 = new Guid("ad80c8e8-f708-4b7f-a29a-1f4eef4aad30");
+        private Guid FlightId2 = new Guid("3d1275cb-b540-4799-aa3d-2458b61d152d");
         private const int PriceWhenBooked2 = 200;
         private const string SeatNumber2 = "30B";
-
-        private const string Guid3 = "b431a2ab-730c-4df0-8e9d-81fc74b5b4b8";
+        
+        private Guid Guid3 = new Guid("b431a2ab-730c-4df0-8e9d-81fc74b5b4b8");
         private Guid CustomerId3 = new Guid("26797c2c-cfea-4276-b67d-56973dfe634b");
         private Guid FlightId3 = new Guid("2fec60bc-7244-41b1-8e45-c8b6a2dbb1cc");
         private const int PriceWhenBooked3 = 300;
@@ -42,12 +45,13 @@ namespace BookingService.Tests
         {
             m_Bookings = new List<Booking>
             {
-                new Booking { Id = new Guid(Guid1), CustomerId = new Guid(CustomerId1), FlightId = new Guid(FlightId1), PriceWhenBooked = PriceWhenBooked1, SeatNumber = SeatNumber1},
-                new Booking { Id = new Guid(Guid2), CustomerId = new Guid(CustomerId2), FlightId = new Guid(FlightId2), PriceWhenBooked = PriceWhenBooked2, SeatNumber = SeatNumber2},
+                new Booking { Id = Guid1, CustomerId = CustomerId1, FlightId = FlightId1, PriceWhenBooked = PriceWhenBooked1, SeatNumber = SeatNumber1},
+                new Booking { Id = Guid2, CustomerId = CustomerId2, FlightId = FlightId2, PriceWhenBooked = PriceWhenBooked2, SeatNumber = SeatNumber2},
             };
 
             m_BookingRepository = Substitute.For<IBookingRepository>();
             m_MessageRepository = Substitute.For<IMessageRepository>();
+            m_FlightValidator = Substitute.For<IFlightValidator>();
 
             m_BookingRepository.Bookings.ReturnsForAnyArgs(m_Bookings);
             m_BookingRepository.GetBookings()
@@ -69,6 +73,9 @@ namespace BookingService.Tests
             m_BookingRepository.DeleteAsync(Arg.Any<Booking>())
                 .Returns(0)
                 .AndDoes(y => m_Bookings.Remove(y.Arg<Booking>()));
+
+            m_FlightValidator.HasSeatsAvailable(FlightId1).Returns<bool>(true);
+            m_FlightValidator.HasSeatsAvailable(FlightId3).Returns<bool>(false);
         }
 
         #region GetBooking(s)
@@ -77,7 +84,7 @@ namespace BookingService.Tests
         public async Task GetAllBookingsReturnsOkObjectResponse()
         {
             // Arrange
-            var bookingController = new BookingController(m_BookingRepository, m_MessageRepository);
+            var bookingController = new BookingController(m_BookingRepository, m_MessageRepository, m_FlightValidator);
 
             // Act
             IActionResult result = await bookingController.Get().ConfigureAwait(false);
@@ -92,7 +99,7 @@ namespace BookingService.Tests
         public async Task GetBookingByIdReturnsBadRequestWhenGuidIsNull()
         {
             // Arrange
-            var bookingController = new BookingController(m_BookingRepository, m_MessageRepository);
+            var bookingController = new BookingController(m_BookingRepository, m_MessageRepository, m_FlightValidator);
 
             // Act
             IActionResult result = await bookingController.Get(Guid.Empty).ConfigureAwait(false);
@@ -107,10 +114,10 @@ namespace BookingService.Tests
         public async Task GetByGuidReturnsNotFoundResultWhenNoResults()
         {
             // Arrange
-            var bookingController = new BookingController(m_BookingRepository, m_MessageRepository);
+            var bookingController = new BookingController(m_BookingRepository, m_MessageRepository, m_FlightValidator);
 
             // Act
-            IActionResult result = await bookingController.Get(new Guid(Guid3)).ConfigureAwait(false);
+            IActionResult result = await bookingController.Get(Guid3).ConfigureAwait(false);
             var parsedResult = result as NotFoundResult;
 
             // Assert
@@ -123,11 +130,11 @@ namespace BookingService.Tests
         public async Task GetBookingByIdReturnsOkObjectResultAndCorrectObjectWhenRecordFound()
         {
             // Arrange
-            m_Bookings.Add(new Booking { Id = new Guid(Guid3), CustomerId = CustomerId3, FlightId = FlightId3, PriceWhenBooked = PriceWhenBooked3, SeatNumber = SeatNumber3 });
-            var bookingController = new BookingController(m_BookingRepository, m_MessageRepository);
+            m_Bookings.Add(new Booking { Id = Guid3, CustomerId = CustomerId3, FlightId = FlightId3, PriceWhenBooked = PriceWhenBooked3, SeatNumber = SeatNumber3 });
+            var bookingController = new BookingController(m_BookingRepository, m_MessageRepository, m_FlightValidator);
 
             // Act
-            IActionResult result = await bookingController.Get(new Guid(Guid2)).ConfigureAwait(false);
+            IActionResult result = await bookingController.Get(Guid2).ConfigureAwait(false);
             var parsedResult = result as OkObjectResult;
 
             // Assert
@@ -137,8 +144,8 @@ namespace BookingService.Tests
             var response = Assert.IsType<BookingResponse>((parsedResult.Value));
 
             BookingResponseDto booking2 = response.Booking;
-            Assert.Equal(CustomerId2, booking2.CustomerId.ToString());
-            Assert.Equal(FlightId2, booking2.FlightId.ToString());
+            Assert.Equal(CustomerId2, booking2.CustomerId);
+            Assert.Equal(FlightId2, booking2.FlightId);
             Assert.Equal(PriceWhenBooked2, booking2.PriceWhenBooked);
             Assert.Equal(SeatNumber2, booking2.SeatNumber);
         }
@@ -148,11 +155,11 @@ namespace BookingService.Tests
         #region PostBooking
 
         [Fact]
-        public async Task PostReturnsOkObjectResultWhenBookingIsAdded()
+        public async Task PostReturnsOkObjectResultWhenBookingIsAddedForFlightWithAvailableSeatss()
         {
             // Arrange
-            var bookingController = new BookingController(m_BookingRepository, m_MessageRepository);
-            var bookingRequestDto = new BookingRequestDto { CustomerId = CustomerId3, FlightId = FlightId3, PriceWhenBooked = PriceWhenBooked3, SeatNumber = SeatNumber3 };
+            var bookingController = new BookingController(m_BookingRepository, m_MessageRepository, m_FlightValidator);
+            var bookingRequestDto = new BookingRequestDto { CustomerId = CustomerId3, FlightId = FlightId1, PriceWhenBooked = PriceWhenBooked3, SeatNumber = SeatNumber3 };
             var bookingRequest = new BookingRequest { Booking = bookingRequestDto };
 
             // Act
@@ -167,16 +174,32 @@ namespace BookingService.Tests
             var bookingResponse = Assert.IsType<BookingResponseDto>(response.Booking);
             Assert.NotEqual(Guid.Empty, bookingResponse.Id);
             Assert.Equal(CustomerId3, bookingResponse.CustomerId);
-            Assert.Equal(FlightId3, bookingResponse.FlightId);
+            Assert.Equal(FlightId1, bookingResponse.FlightId);
             Assert.Equal(PriceWhenBooked3, bookingResponse.PriceWhenBooked);
             Assert.Equal(SeatNumber3, bookingResponse.SeatNumber);
+        }
+
+        [Fact]
+        public async Task PostReturnsBadRequestObjectResultWhenBookingIsAddedForFlightWithoutAvailableSeatss()
+        {
+            // Arrange
+            var bookingController = new BookingController(m_BookingRepository, m_MessageRepository, m_FlightValidator);
+            var bookingRequestDto = new BookingRequestDto { CustomerId = CustomerId3, FlightId = FlightId3, PriceWhenBooked = PriceWhenBooked3, SeatNumber = SeatNumber3 };
+            var bookingRequest = new BookingRequest { Booking = bookingRequestDto };
+
+            // Act
+            IActionResult result = await bookingController.Post(bookingRequest).ConfigureAwait(false);
+            var parsedResult = result as BadRequestObjectResult;
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(result);
         }
 
         [Fact]
         public async Task PostReturnsBadRequestResultWhenBookingIsNull()
         {
             // Arrange
-            var bookingController = new BookingController(m_BookingRepository, m_MessageRepository);
+            var bookingController = new BookingController(m_BookingRepository, m_MessageRepository, m_FlightValidator);
             var bookingRequest = new BookingRequest { Booking = null };
 
             // Act
@@ -194,12 +217,12 @@ namespace BookingService.Tests
         public async Task PutReturnsNotFoundResponseWhenIdDoesNotExist()
         {
             // Arrange
-            var bookingController = new BookingController(m_BookingRepository, m_MessageRepository);
+            var bookingController = new BookingController(m_BookingRepository, m_MessageRepository, m_FlightValidator);
             var bookingRequestDto = new BookingRequestDto { CustomerId = CustomerId3, FlightId = FlightId3, PriceWhenBooked = PriceWhenBooked3, SeatNumber = SeatNumber3 };
             var bookingRequest = new BookingRequest { Booking = bookingRequestDto };
             
             // Act
-            IActionResult result = await bookingController.Put(new Guid(Guid3), bookingRequest).ConfigureAwait(false);
+            IActionResult result = await bookingController.Put(Guid3, bookingRequest).ConfigureAwait(false);
             var parsedResult = result as NotFoundResult;
 
             // Assert
@@ -212,11 +235,11 @@ namespace BookingService.Tests
         {
 
             // Arrange
-            var bookingController = new BookingController(m_BookingRepository, m_MessageRepository);
+            var bookingController = new BookingController(m_BookingRepository, m_MessageRepository, m_FlightValidator);
             var bookingRequestDto = new BookingRequestDto { CustomerId = CustomerId3, FlightId = FlightId3, PriceWhenBooked = PriceWhenBooked3, SeatNumber = SeatNumber3 };
             var bookingRequest = new BookingRequest { Booking = bookingRequestDto };
             
-            var guid = new Guid(Guid2);
+            var guid = Guid2;
 
             // Act
             IActionResult result = await bookingController.Put(guid, bookingRequest).ConfigureAwait(false);
@@ -242,11 +265,11 @@ namespace BookingService.Tests
         public async Task PutReturnsBadRequestWhenBookingIsNull()
         {
             // Arrange
-            var bookingController = new BookingController(m_BookingRepository, m_MessageRepository);
+            var bookingController = new BookingController(m_BookingRepository, m_MessageRepository, m_FlightValidator);
             var bookingRequest = new BookingRequest { Booking = null };
 
             // Act
-            IActionResult result = await bookingController.Put(new Guid(Guid3), bookingRequest).ConfigureAwait(false);
+            IActionResult result = await bookingController.Put(Guid3, bookingRequest).ConfigureAwait(false);
             var parsedResult = result as BadRequestResult;
 
             // Assert
@@ -258,7 +281,7 @@ namespace BookingService.Tests
         public async Task PutReturnsNotFoundWhenIdIsNull()
         {
             // Arrange
-            var bookingController = new BookingController(m_BookingRepository, m_MessageRepository);
+            var bookingController = new BookingController(m_BookingRepository, m_MessageRepository, m_FlightValidator);
             var bookingRequestDto = new BookingRequestDto { CustomerId = CustomerId3, FlightId = FlightId3, PriceWhenBooked = PriceWhenBooked3, SeatNumber = SeatNumber3 };
             var bookingRequest = new BookingRequest { Booking = bookingRequestDto };
 
@@ -279,10 +302,10 @@ namespace BookingService.Tests
         public async Task DeleteReturnsNotFoundResponseWhenIdDoesNotExist()
         {
             // Arrange
-            var bookingController = new BookingController(m_BookingRepository, m_MessageRepository);
+            var bookingController = new BookingController(m_BookingRepository, m_MessageRepository, m_FlightValidator);
 
             // Act
-            IActionResult result = await bookingController.Delete(new Guid(Guid3)).ConfigureAwait(false);
+            IActionResult result = await bookingController.Delete(Guid3).ConfigureAwait(false);
             var parsedResult = result as NotFoundResult;
 
             // Assert
@@ -294,8 +317,8 @@ namespace BookingService.Tests
         public async Task DeleteReturnsOkResponseWhenExistingBindingDeleted()
         {
             // Arrange
-            var bookingController = new BookingController(m_BookingRepository, m_MessageRepository);
-            var bookingGuid = new Guid(Guid2);
+            var bookingController = new BookingController(m_BookingRepository, m_MessageRepository, m_FlightValidator);
+            var bookingGuid = Guid2;
             Booking booking = m_Bookings.Single(x => x.Id == bookingGuid);
 
             // Act

@@ -15,6 +15,9 @@ using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 using Swashbuckle.AspNetCore.Swagger;
 using System.Reflection;
 using System.IO;
+using FlightService.Client;
+using BookingService.FlightValidation;
+using BookingService.Extensions;
 
 namespace BookingService
 {
@@ -32,11 +35,20 @@ namespace BookingService
         {
             services.AddMvc();
 
+            var flightValidator = new FlightValidator(Configuration["FlightServiceClient:BaseUri"]);
+
             services
                 .AddDbContext<ApplicationContext>(options => ApplicationContextConfigurator.SetContextOptions(options, Configuration))
                 .AddScoped<IBookingRepository, BookingRepository>()
                 .AddScoped<IMessageRepository, MessageRepository>()
+                .AddScoped<IFlightServiceAPI, FlightServiceAPI>()
                 .AddScoped<IUnitOfWork, ApplicationContext>();
+            
+            services.AddScoped<IFlightValidator, FlightValidator>(
+                serviceProvider =>
+                {
+                    return flightValidator;
+                });
 
             services.AddSingleton<IHostedService, OutboundMessageService<Booking>>(
                 serviceProvider =>

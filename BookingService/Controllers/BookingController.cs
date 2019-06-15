@@ -11,6 +11,8 @@ using System;
 using System.Linq;
 using Newtonsoft.Json;
 using System.Transactions;
+using BookingService.FlightValidation;
+using BookingService.FlightValidation.Errors;
 
 namespace BookingService.Controllers
 {
@@ -19,11 +21,15 @@ namespace BookingService.Controllers
     {
         private readonly IBookingRepository m_BookingRepository;
         private readonly IMessageRepository m_MessageRepository;
+        private readonly IFlightValidator m_FlightValidator;
 
-        public BookingController(IBookingRepository bookingRepository, IMessageRepository messageRepository)
+        public BookingController(IBookingRepository bookingRepository,
+            IMessageRepository messageRepository,
+            IFlightValidator flightValidator)
         {
             m_BookingRepository = bookingRepository;
             m_MessageRepository = messageRepository;
+            m_FlightValidator = flightValidator;
         }
 
         /// <summary>
@@ -83,10 +89,14 @@ namespace BookingService.Controllers
                 return new BadRequestResult();
             }
 
+            Guid flightId = bookingRequest.Booking.FlightId;
+            if (!await m_FlightValidator.HasSeatsAvailable(flightId))
+                return new BadRequestObjectResult(FlightHasNoSeatsResponse.ErrorMessage);
+
             Booking booking = bookingRequest.Booking.ToBooking();
 
             booking.Id = Guid.NewGuid();
-            var insertedBooking = (Booking)await MessageBusTransactionCall(nameof(Post).ToUpperInvariant(), booking,
+            var insertedBooking = (Booking) await MessageBusTransactionCall(nameof(Post).ToUpperInvariant(), booking,
                 async () => await m_BookingRepository.InsertAsync(booking));
 
             var response = new BookingResponse { Booking = insertedBooking.ToBookingResponseDto() };
