@@ -14,6 +14,7 @@
   
     <PackageReference Include="EventDispatcher.Azure" Version="1.0.0" />
     <PackageReference Include="EventDispatcher.Generic" Version="1.0.0" />
+    <PackageReference Include="FlightService.Client" Version="1.0.0" />
   
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.1.6" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.1.3" />
