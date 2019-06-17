@@ -29,10 +29,4 @@
 
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="FlightService.Client">
-      <HintPath>..\..\FlightService\client\FlightService.Client\src\FlightService.Client\bin\Debug\netcoreapp2.1\FlightService.Client.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>
